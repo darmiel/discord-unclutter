@@ -80,6 +80,9 @@ func main() {
 		// check cooldown
 		if cd, vl := checkAndUpdateCooldown(u.UserID); cd {
 			log.Println("  ⏰  User", u.UserID, "on cooldown! ( VL:", vl, ")")
+			if vl >= 3 {
+				log.Println("WARN: User", u.UserID, "has a high amount of violations!")
+			}
 			return
 		}
 
