@@ -141,7 +141,7 @@ func (us *UserSess) findOrCreateText(voiceChannelID string) (chcat *ChannelCateg
 				ID:    us.GuildID, // Guild ID = everyone
 				Type:  "0",
 				Allow: 0,
-				Deny:  discordgo.PermissionViewChannel | discordgo.PermissionReadMessageHistory,
+				Deny:  discordgo.PermissionViewChannel, /* | discordgo.PermissionReadMessageHistory */
 			},
 		}
 
