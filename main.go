@@ -72,7 +72,7 @@ func main() {
 		// check leave
 		if u.ChannelID == "" || u.BeforeUpdate != nil {
 			sess.userLeaveChannel()
-			if u.BeforeUpdate != nil && u.BeforeUpdate.ChannelID == "" {
+			if u.ChannelID == "" || (u.BeforeUpdate != nil && u.BeforeUpdate.ChannelID == "") {
 				return
 			}
 		}
@@ -140,7 +140,7 @@ func main() {
 			log.Println("Error receiving channel:", err)
 			return
 		}
-		fmt.Println("CHAT |", channel.Name, "(", channel.Name, "):", e.Content)
+		fmt.Println("CHAT |", channel.Name, "(", e.Author.Username, "):", e.Content)
 	})
 
 	fmt.Println("Bot is now running.  Press CTRL-C to exit.")
