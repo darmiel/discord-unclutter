@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"github.com/bwmarrin/discordgo"
 	"log"
 	"strings"
@@ -75,6 +76,10 @@ func findUnclutteredChannels(s *discordgo.Session, guildID string) (channels []*
 }
 
 func (us *UserSess) findOrCreateText(voiceChannelID string) (chcat *ChannelCategory, err error) {
+	if voiceChannelID == "" {
+		return nil, errors.New("empty voice channel id")
+	}
+
 	var chID string
 	var catID string
 

@@ -40,13 +40,44 @@ func main() {
 			Session:   s,
 			Previous:  u.BeforeUpdate,
 		}
-		leftChannel := u.BeforeUpdate != nil
 
-		if leftChannel {
+		/*
+			JOIN:
+			2021/01/15 21:23:05 Current-State: &{0xc0003960a0 <nil>}
+			2021/01/15 21:23:05   channel: 799732716340772913 user: 150347348088848384 guild: 779370167699898399
+			2021/01/15 21:23:05 Previous-State: <nil>
+			2021/01/15 21:23:05   (nothing)
+		*/
+
+		/*
+			SWITCH:
+			2021/01/15 21:23:23 Current-State: &{0xc000396140 0xc000396190}
+			2021/01/15 21:23:23   channel: 799732735282380810 user: 150347348088848384 guild: 779370167699898399
+			2021/01/15 21:23:23 Previous-State: &{150347348088848384 f666b9e60388a90ec7491e013c886e82 799732716340772913 779370167699898399 false true false false false}
+			2021/01/15 21:23:23   channel: 799732716340772913 user: 150347348088848384 guild: 779370167699898399
+		*/
+
+		/*
+			LEAVE:
+			2021/01/15 21:23:45 Current-State: &{0xc000396370 0xc0003963c0}
+			2021/01/15 21:23:45   channel:  user: 150347348088848384 guild: 779370167699898399
+			2021/01/15 21:23:45 Previous-State: &{150347348088848384 f666b9e60388a90ec7491e013c886e82 799732735282380810 779370167699898399 false true false false false}
+			2021/01/15 21:23:45   channel: 799732735282380810 user: 150347348088848384 guild: 779370167699898399
+		*/
+
+		if u != nil && u.BeforeUpdate != nil && u.BeforeUpdate.ChannelID == "" {
+			// check leave
 			sess.userLeaveChannel()
+		} else if u != nil && u.BeforeUpdate != nil && u.BeforeUpdate.ChannelID != "" {
+			// check switch
+			sess.userLeaveChannel()
+			sess.userJoinChannel()
 		} else {
+			// check join
 			sess.userJoinChannel()
 		}
+
+		log.Println("---")
 	})
 
 	err = discord.Open()
