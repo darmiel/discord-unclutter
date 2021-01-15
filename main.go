@@ -140,7 +140,7 @@ func main() {
 			log.Println("Error receiving channel:", err)
 			return
 		}
-		log.Println("CHAT |", channel.Name, "(", channel.Name, "):", e.Content)
+		fmt.Println("CHAT |", channel.Name, "(", channel.Name, "):", e.Content)
 	})
 
 	fmt.Println("Bot is now running.  Press CTRL-C to exit.")
