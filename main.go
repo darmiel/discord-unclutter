@@ -65,19 +65,25 @@ func main() {
 			2021/01/15 21:23:45   channel: 799732735282380810 user: 150347348088848384 guild: 779370167699898399
 		*/
 
-		if u != nil && u.BeforeUpdate != nil && u.BeforeUpdate.ChannelID == "" {
-			// check leave
-			sess.userLeaveChannel()
-		} else if u != nil && u.BeforeUpdate != nil && u.BeforeUpdate.ChannelID != "" {
-			// check switch
-			sess.userLeaveChannel()
-			sess.userJoinChannel()
-		} else {
-			// check join
-			sess.userJoinChannel()
+		if u == nil {
+			return
 		}
 
-		log.Println("---")
+		// check leave
+		if u.ChannelID == "" || u.BeforeUpdate != nil {
+			sess.userLeaveChannel()
+			if u.BeforeUpdate != nil && u.BeforeUpdate.ChannelID == "" {
+				return
+			}
+		}
+
+		// check cooldown
+		if cd, vl := checkAndUpdateCooldown(u.UserID); cd {
+			log.Println("  ⏰  User", u.UserID, "on cooldown! ( VL:", vl, ")")
+			return
+		}
+
+		sess.userJoinChannel()
 	})
 
 	err = discord.Open()
@@ -123,6 +129,16 @@ func main() {
 			}
 		}
 	}
+
+	discord.AddHandler(func(s *discordgo.Session, e *discordgo.MessageCreate) {
+		chanId := e.ChannelID
+		channel, err := s.State.Channel(chanId)
+		if err != nil {
+			log.Println("Error receiving channel:", err)
+			return
+		}
+		log.Println("CHAT |", channel.Name, "(", channel.Name, "):", e.Content)
+	})
 
 	fmt.Println("Bot is now running.  Press CTRL-C to exit.")
 	sc := make(chan os.Signal, 1)
