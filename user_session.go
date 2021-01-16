@@ -42,8 +42,8 @@ func (us *UserSess) userJoinChannel() {
 	} else {
 		textChannel := channelPair.Channel
 
-		if err := giveAccess(us.Session, us.UserID, textChannel.ID); err != nil {
-			log.Println("ERROR: Couldn't give access to channel", textChannel.ID, "for", us.UserID)
+		if err := grantAccess(us.Session, us.UserID, textChannel.ID); err != nil {
+			log.Println("ERROR: Granting Access (", textChannel.Name, ") for", us.UserID, ":", err)
 			return
 		}
 
@@ -73,7 +73,7 @@ func (us *UserSess) userLeaveChannel() {
 		textChannel := channelPair.Channel
 
 		if err := revokeAccess(us.Session, us.UserID, textChannel.ID, false); err != nil {
-			log.Println("ERROR: Couldn't revoke access from channel", textChannel.ID, " user ", us.UserID)
+			log.Println("ERROR: Revoking Access (", textChannel.Name, ") for", us.UserID, ":", err)
 			return
 		}
 

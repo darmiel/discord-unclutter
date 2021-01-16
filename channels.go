@@ -20,33 +20,6 @@ type UnclutteredChannel struct {
 
 var channelCache = make(map[string]*ChannelCategory)
 
-func giveAccess(s *discordgo.Session, userID string, channelID string) (err error) {
-	return s.ChannelPermissionSet(
-		channelID,
-		userID,
-		"1",
-		discordgo.PermissionViewChannel,
-		0,
-	)
-}
-
-func revokeAccess(s *discordgo.Session, userID string, channelID string, force bool) (err error) {
-	if force {
-		return s.ChannelPermissionSet(
-			channelID,
-			userID,
-			"1",
-			0,
-			discordgo.PermissionViewChannel,
-		)
-	}
-
-	return s.ChannelPermissionDelete(
-		channelID,
-		userID,
-	)
-}
-
 func findUnclutteredChannels(s *discordgo.Session, guildID string) (channels []*UnclutteredChannel, category *discordgo.Channel, err error) {
 	allChannels, err := s.GuildChannels(guildID)
 	if err != nil {
@@ -124,6 +97,7 @@ func (us *UserSess) findOrCreateText(voiceChannelID string) (chcat *ChannelCateg
 
 	// create channels, if necessary
 	if catChannel == nil {
+		log.Println("🎉 Creating category", CategoryName)
 		catChannel, err = us.Session.GuildChannelCreateComplex(us.GuildID, discordgo.GuildChannelCreateData{
 			Name: CategoryName,
 			Type: discordgo.ChannelTypeGuildCategory,
@@ -135,6 +109,8 @@ func (us *UserSess) findOrCreateText(voiceChannelID string) (chcat *ChannelCateg
 	}
 
 	if chChannel == nil {
+		log.Println("🎉 Creating channel for voice", us.ChannelID)
+
 		// create channel
 		overwrites := []*discordgo.PermissionOverwrite{
 			{
@@ -142,6 +118,12 @@ func (us *UserSess) findOrCreateText(voiceChannelID string) (chcat *ChannelCateg
 				Type:  "0",
 				Allow: 0,
 				Deny:  discordgo.PermissionViewChannel, /* | discordgo.PermissionReadMessageHistory */
+			},
+			{
+				ID:    us.Session.State.User.ID,
+				Type:  "1",
+				Allow: discordgo.PermissionAllChannel, // all access to channel
+				Deny:  0,
 			},
 		}
 
@@ -152,8 +134,11 @@ func (us *UserSess) findOrCreateText(voiceChannelID string) (chcat *ChannelCateg
 			return nil, err
 		}
 
+		name := friendlyChannelName(channel.Name)
+		log.Println("    🎉 Friendly:", name)
+
 		chChannel, err = us.Session.GuildChannelCreateComplex(us.GuildID, discordgo.GuildChannelCreateData{
-			Name:                 friendlyChannelName(channel.Name),
+			Name:                 name,
 			Type:                 discordgo.ChannelTypeGuildText,
 			ParentID:             catChannel.ID,
 			Topic:                TopicPrefix + us.ChannelID,
