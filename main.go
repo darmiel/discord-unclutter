@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"github.com/bwmarrin/discordgo"
+	"github.com/darmiel/discord-unclutterer/internal/unclutterer"
+	"github.com/darmiel/discord-unclutterer/internal/unclutterer/cooldown"
 	"github.com/joho/godotenv"
 	"log"
 	"os"
@@ -33,7 +35,7 @@ func main() {
 	}
 
 	discord.AddHandler(func(s *discordgo.Session, u *discordgo.VoiceStateUpdate) {
-		sess := &UserSess{
+		sess := &unclutterer.UserSess{
 			UserID:    u.UserID,
 			ChannelID: u.ChannelID,
 			GuildID:   u.GuildID,
@@ -71,14 +73,14 @@ func main() {
 
 		// check leave
 		if u.ChannelID == "" || u.BeforeUpdate != nil {
-			sess.userLeaveChannel()
+			sess.UserLeave()
 			if u.ChannelID == "" || (u.BeforeUpdate != nil && u.BeforeUpdate.ChannelID == "") {
 				return
 			}
 		}
 
 		// check cooldown
-		if cd, vl := checkAndUpdateCooldown(u.UserID); cd {
+		if cd, vl := cooldown.IsOnCooldown(u.UserID); cd {
 			log.Println("  ⏰  User", u.UserID, "on cooldown! ( VL:", vl, ")")
 			if vl >= 3 {
 				log.Println("WARN: User", u.UserID, "has a high amount of violations!")
@@ -86,7 +88,7 @@ func main() {
 			return
 		}
 
-		sess.userJoinChannel()
+		sess.UserJoin()
 	})
 
 	err = discord.Open()
@@ -102,7 +104,7 @@ func main() {
 		log.Println("└", guild.ID, "(", guild.Name, ")")
 
 		// find channels
-		channels, _, _ := findUnclutteredChannels(discord, guild.ID)
+		channels, _, _ := unclutterer.FindCreatedTextChannels(discord, guild.ID)
 		if channels == nil {
 			log.Println("Error checking guild:", guild.ID)
 			continue
@@ -113,13 +115,12 @@ func main() {
 
 			var cleared = false
 			for _, perm := range channel.PermissionOverwrites {
-				// ignore @everyone
-				if perm.ID == guild.ID {
+				// ignore @everyone and self
+				if perm.ID == guild.ID || perm.ID == discord.State.User.ID {
 					continue
 				}
-
 				// remove
-				if err := revokeAccess(discord, perm.ID, channel.ID, false); err != nil {
+				if err := unclutterer.RevokeAccess(discord, perm.ID, channel.ID, false); err != nil {
 					log.Println("    └ ❌", err)
 				} else {
 					log.Println("    └ ✅", perm.ID)

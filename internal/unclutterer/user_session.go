@@ -1,38 +1,10 @@
-package main
+package unclutterer
 
 import (
-	"github.com/bwmarrin/discordgo"
 	"log"
-	"regexp"
 )
 
-var (
-	channelNameRegex *regexp.Regexp
-)
-
-const (
-	TopicPrefix  = "dcuncltr: "
-	CategoryName = "VOICE TEXT CHANNELS"
-)
-
-func init() {
-	channelNameRegex = regexp.MustCompile("[^\\w-_]]")
-}
-
-func friendlyChannelName(channel string) (res string) {
-	res = channelNameRegex.ReplaceAllString(channel, "")
-	return
-}
-
-type UserSess struct {
-	UserID    string
-	ChannelID string
-	GuildID   string
-	Session   *discordgo.Session
-	Previous  *discordgo.VoiceState
-}
-
-func (us *UserSess) userJoinChannel() {
+func (us *UserSess) UserJoin() {
 	log.Println("User", us.UserID, "joined", "channel", us.ChannelID, "from guild", us.GuildID)
 
 	// find channel
@@ -42,7 +14,7 @@ func (us *UserSess) userJoinChannel() {
 	} else {
 		textChannel := channelPair.Channel
 
-		if err := grantAccess(us.Session, us.UserID, textChannel.ID); err != nil {
+		if err := GrantAccess(us.Session, us.UserID, textChannel.ID); err != nil {
 			log.Println("ERROR: Granting Access (", textChannel.Name, ") for", us.UserID, ":", err)
 			return
 		}
@@ -57,7 +29,7 @@ func (us *UserSess) userJoinChannel() {
 	}
 }
 
-func (us *UserSess) userLeaveChannel() {
+func (us *UserSess) UserLeave() {
 	if us.Previous == nil {
 		log.Println("User", us.UserID, "left unknown channel.")
 		return
@@ -72,7 +44,7 @@ func (us *UserSess) userLeaveChannel() {
 	} else {
 		textChannel := channelPair.Channel
 
-		if err := revokeAccess(us.Session, us.UserID, textChannel.ID, false); err != nil {
+		if err := RevokeAccess(us.Session, us.UserID, textChannel.ID, false); err != nil {
 			log.Println("ERROR: Revoking Access (", textChannel.Name, ") for", us.UserID, ":", err)
 			return
 		}

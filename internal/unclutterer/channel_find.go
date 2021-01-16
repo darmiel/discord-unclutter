@@ -1,26 +1,14 @@
-package main
+package unclutterer
 
 import (
 	"errors"
 	"github.com/bwmarrin/discordgo"
 	"log"
-	"strings"
 )
-
-// ChannelCategory is a tuple of a channel and the category
-type ChannelCategory struct {
-	Channel  *discordgo.Channel
-	Category *discordgo.Channel
-}
-
-type UnclutteredChannel struct {
-	*discordgo.Channel
-	VoiceChannelID string
-}
 
 var channelCache = make(map[string]*ChannelCategory)
 
-func findUnclutteredChannels(s *discordgo.Session, guildID string) (channels []*UnclutteredChannel, category *discordgo.Channel, err error) {
+func FindCreatedTextChannels(s *discordgo.Session, guildID string) (channels []*UnclutteredChannel, category *discordgo.Channel, err error) {
 	allChannels, err := s.GuildChannels(guildID)
 	if err != nil {
 		return nil, nil, err
@@ -61,7 +49,7 @@ func (us *UserSess) findOrCreateText(voiceChannelID string) (chcat *ChannelCateg
 		chID = chcat.Channel.ID
 		catID = chcat.Channel.ID
 	} else {
-		channels, category, _ := findUnclutteredChannels(us.Session, us.GuildID)
+		channels, category, _ := FindCreatedTextChannels(us.Session, us.GuildID)
 
 		if category != nil {
 			catID = category.ID
@@ -97,56 +85,20 @@ func (us *UserSess) findOrCreateText(voiceChannelID string) (chcat *ChannelCateg
 
 	// create channels, if necessary
 	if catChannel == nil {
-		log.Println("🎉 Creating category", CategoryName)
-		catChannel, err = us.Session.GuildChannelCreateComplex(us.GuildID, discordgo.GuildChannelCreateData{
-			Name: CategoryName,
-			Type: discordgo.ChannelTypeGuildCategory,
-		})
-		if err != nil {
+		if channel, err := us.CreateCategory(); err != nil {
 			log.Println("ERROR: (creating category)", err)
 			return nil, err
+		} else {
+			catChannel = channel
 		}
 	}
 
 	if chChannel == nil {
-		log.Println("🎉 Creating channel for voice", us.ChannelID)
-
-		// create channel
-		overwrites := []*discordgo.PermissionOverwrite{
-			{
-				ID:    us.GuildID, // Guild ID = everyone
-				Type:  "0",
-				Allow: 0,
-				Deny:  discordgo.PermissionViewChannel, /* | discordgo.PermissionReadMessageHistory */
-			},
-			{
-				ID:    us.Session.State.User.ID,
-				Type:  "1",
-				Allow: discordgo.PermissionAllChannel, // all access to channel
-				Deny:  0,
-			},
-		}
-
-		// get channel
-		channel, err := us.Session.Channel(us.ChannelID)
-		if err != nil || channel == nil {
-			log.Println("ERROR: (retrieving channel info)", err)
-			return nil, err
-		}
-
-		name := friendlyChannelName(channel.Name)
-		log.Println("    🎉 Friendly:", name)
-
-		chChannel, err = us.Session.GuildChannelCreateComplex(us.GuildID, discordgo.GuildChannelCreateData{
-			Name:                 name,
-			Type:                 discordgo.ChannelTypeGuildText,
-			ParentID:             catChannel.ID,
-			Topic:                TopicPrefix + us.ChannelID,
-			PermissionOverwrites: overwrites,
-		})
-		if err != nil {
+		if channel, err := us.CreateChannel(catChannel.ID); err != nil {
 			log.Println("ERROR: (creating text channel)", err)
 			return nil, err
+		} else {
+			chChannel = channel
 		}
 	}
 
@@ -165,11 +117,4 @@ func (us *UserSess) findOrCreateText(voiceChannelID string) (chcat *ChannelCateg
 	channelCache[voiceChannelID] = c
 
 	return c, nil
-}
-
-func extractChannelID(channel *discordgo.Channel) (voiceID string) {
-	if strings.HasPrefix(channel.Topic, TopicPrefix) {
-		return strings.TrimSpace(channel.Topic[len(TopicPrefix):])
-	}
-	return ""
 }
