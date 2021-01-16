@@ -105,7 +105,11 @@ func HandleMessageReactionAdd(s *discordgo.Session, ev *discordgo.MessageReactio
 	} else {
 		log.Println("Opt-out successful.")
 		if msg != nil {
-			_, _ = s.ChannelMessageEdit(ev.ChannelID, msg.ID, "[ <@"+ev.UserID+"> ] 👉 😊 Okay! Du erhältst keine weiteren Ghost-Pings")
+			_, _ = s.ChannelMessageEdit(
+				ev.ChannelID,
+				msg.ID,
+				"[ <@"+ev.UserID+"> | https://tenor.com/wroQ.gif ] 👉 😊 Okay! Du erhältst keine weiteren Ghost-Pings",
+			)
 		}
 	}
 }
@@ -145,7 +149,11 @@ func HandleMessageReactionRemove(s *discordgo.Session, ev *discordgo.MessageReac
 	} else {
 		log.Println("Opt-in successful.")
 		if msg != nil {
-			_, _ = s.ChannelMessageEdit(ev.ChannelID, msg.ID, "[ <@"+ev.UserID+"> ] 👈 😊 Okay! Du erhältst wieder Ghost-Pings")
+			_, _ = s.ChannelMessageEdit(
+				ev.ChannelID,
+				msg.ID,
+				"[ <@"+ev.UserID+"> | https://tenor.com/v4hv.gif ] 👈 😊 Okay! Du erhältst wieder Ghost-Pings",
+			)
 		}
 	}
 }

@@ -74,7 +74,7 @@ Hallo [ @everyone | https://i.imgur.com/aHX3n0z.png ]!
 Dieser Channel wurde für den Voice-Channel ` + "`" + voiceChannel.Name + "`" + ` erstellt.
 Er wird nur dann sichtbar, wenn du in diesen Voice-Channel gehst. (Privater Textkanal für Sprachkanäle).
 
-Jedes Mal, wenn du Zugriff zu einem solchen Text-Channel bekommst, erhälst du einen Ghost-Ping.
+Jedes Mal, wenn du Zugriff zu einem solchen Text-Channel bekommst, erhältst du einen Ghost-Ping.
 Möchtest du diese Ghost-Pings nicht mehr erhalten, klicke auf '` + Reaction + `'`
 
 	// send message

@@ -72,6 +72,10 @@ func (us *UserVoiceStateSession) findOrCreateText(voiceChannelID string) (chcat 
 		if err != discordgo.ErrStateNotFound {
 			return nil, err
 		}
+		log.Println("🧠 Advanced ChID-Lookup")
+		if chC, err := us.Session.Channel(chID); err == nil {
+			chChannel = chC
+		}
 	} else {
 		chChannel = chC
 	}
@@ -79,9 +83,16 @@ func (us *UserVoiceStateSession) findOrCreateText(voiceChannelID string) (chcat 
 		if err != discordgo.ErrStateNotFound {
 			return nil, err
 		}
+		log.Println("🧠 Advanced CatID-Lookup")
+		if catC, err := us.Session.Channel(catID); err == nil {
+			catChannel = catC
+		}
 	} else {
 		catChannel = catC
 	}
+
+	log.Println("ch-channel:", chID, chChannel)
+	log.Println("cat-channel:", catID, catChannel)
 
 	// create channels, if necessary
 	if catChannel == nil {
