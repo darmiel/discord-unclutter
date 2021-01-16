@@ -6,6 +6,7 @@ import (
 	"time"
 )
 
+// TODO: Use from config
 //goland:noinspection GoUnhandledErrorResult
 func BlocksGhostping(userID string) (block bool, err error) {
 	db, err := bolt.Open(
@@ -20,6 +21,7 @@ func BlocksGhostping(userID string) (block bool, err error) {
 
 	err = db.Update(func(tx *bolt.Tx) error {
 		// check if bucket "ghostping-opt-out" exists
+		// TODO: Use from config
 		bucket, e := tx.CreateBucketIfNotExists(OptOutBucket)
 		if e != nil {
 			err = e

@@ -26,6 +26,5 @@ func Queue(msg *discordgo.Message, delay time.Duration) {
 }
 
 func QueueDefault(msg *discordgo.Message) {
-	message := NewMessage(msg, 0)
-	mayflies.PushBack(message)
+	Queue(msg, 0)
 }

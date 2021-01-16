@@ -13,5 +13,6 @@ func HandleMessageCreate(s *discordgo.Session, e *discordgo.MessageCreate) {
 		log.Println("Error receiving channel:", err)
 		return
 	}
+	// TODO: Use from config
 	fmt.Println("CHAT |", channel.Name, "(", e.Author.Username, "):", e.Content)
 }

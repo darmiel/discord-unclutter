@@ -6,7 +6,9 @@ import (
 )
 
 const (
-	Reaction        = "🖕"
+	// TODO: Use from config
+	Reaction = "🖕"
+	// TODO: Use from config
 	ReactionCommand = "cmd::opt+in:out"
 )
 
@@ -76,6 +78,7 @@ func (us *UserVoiceStateSession) CreateChannel(parentID string) (channel *discor
 }
 
 func (us *UserVoiceStateSession) SendWelcomeMessage(channel *discordgo.Channel, voiceChannel *discordgo.Channel) (message *discordgo.Message, err error) {
+	// TODO: Use from config
 	var text = ReactionCommand + `
 Hallo! [ https://i.imgur.com/aHX3n0z.png ]
 
@@ -83,7 +86,7 @@ Dieser Channel wurde für den Voice-Channel ` + "`" + voiceChannel.Name + "`" + 
 Er wird nur dann sichtbar, wenn du in diesen Voice-Channel gehst. (Privater Textkanal für Sprachkanäle).
 
 Jedes Mal, wenn du Zugriff zu einem solchen Text-Channel bekommst, erhältst du einen Ghost-Ping.
-Möchtest du diese Ghost-Pings nicht mehr erhalten, klicke auf '` + Reaction + `'`
+Möchtest du diese Ghost-Pings nicht mehr erhalten, reagiere auf diese Nachricht mit '` + Reaction + `'`
 
 	// send message
 	log.Println("    └ 💌 Sending message")

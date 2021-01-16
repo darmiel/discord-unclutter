@@ -28,6 +28,7 @@ func init() {
 }
 
 func main() {
+	// TODO: Use from config
 	var tokenSecret string
 	for i := 0; i < len(discordToken); i++ {
 		tokenSecret += "*"
@@ -47,6 +48,7 @@ func main() {
 	}
 
 	// start cleanup
+	// TODO: Use from config
 	cleanup.StartCleanup(discord)
 
 	// register handlers

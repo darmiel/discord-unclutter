@@ -13,7 +13,9 @@ func init() {
 }
 
 const (
-	TopicPrefix  = "dcuncltr: "
+	// TODO: Use from config
+	TopicPrefix = "dcuncltr: "
+	// TODO: Use from config
 	CategoryName = "VOICE TEXT CHANNELS"
 )
 

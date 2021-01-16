@@ -1,0 +1,45 @@
+[Discord]
+DiscordToken = ""
+ChannelTopicPrefix = "dcuncltr: "
+ChannelCategoryName = "VOICE TEXT CHANNELS"
+OptReaction = "🖕"
+ReactionCommand = "cmd::opt+in:out"
+CleanChannelsOnStartup = true
+MayflyCheckInterval = "1s"
+
+[Database]
+AllowGhostPingBlocking = true
+DatabaseBucketName = "ghostping-opt-out"
+DatabasePath = "data.db"
+
+[Cooldown]
+OptCooldown = "3s"
+JoinLeaveCooldown = "4s"
+WarnOnExcessiveViolations = true
+WarnViolationThreshold = 4
+
+[Messages]
+ChannelCreateMessage = """
+{{ ReactionCommand }}
+Hallo! [ https://i.imgur.com/aHX3n0z.png ]
+
+Dieser Channel wurde für den Voice-Channel `{{ VoiceChannelName }}` erstellt.
+Er wird nur dann sichtbar, wenn du in diesen Voice-Channel gehst. (Privater Textkanal für Sprachkanäle).
+
+Jedes Mal, wenn du Zugriff zu einem solchen Text-Channel bekommst, erhältst du einen Ghost-Ping.
+Möchtest du diese Ghost-Pings nicht mehr erhalten, reagiere auf diese Nachricht mit '{{ OptReaction }}'`
+"""
+
+OptInLoading = "[ <@{{ UserID }} ] 👉 **Opt-Out** Ghost-Pings ... (loading)"
+OptInErrorDatabase = "[ <@{{ UserID }}> ] 👉 😡 **Nope:** {{ Error }}"
+OptOutSuccess = "[ <@{{ UserID }}> | https://tenor.com/wroQ.gif ] 👉 😊 Okay! Du erhältst keine weiteren Ghost-Pings"
+
+OptOutLoading = "[ <@{{ UserID }}> ] 👈 **Opt-In** Ghost-Pings ... (loading)"
+OptOutErrorData = "[ <@{{ UserID }}> ] 👈 😡 **Nope:** {{ Error }}"
+OptOutSuccess = "[ <@{{ UserID }}> | https://tenor.com/v4hv.gif ] 👈 😊 Okay! Du erhältst wieder Ghost-Pings"
+
+[Logging]
+VerbosityLevel = 0
+LogChat = true
+LogUserJoin = true
+LogUserLeave = true

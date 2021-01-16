@@ -17,6 +17,7 @@ func HandleVoiceStateUpdate(s *discordgo.Session, u *discordgo.VoiceStateUpdate)
 	// small & ugly hack to ignore mutes / un-mutes, deaves / un-deaves
 	if previousChannel, ok := selfAttributes[u.UserID]; ok {
 		if previousChannel == u.ChannelID {
+			// TODO: Use from config
 			log.Println("🟣 Ignored because same channel")
 			return
 		}
@@ -42,6 +43,7 @@ func HandleVoiceStateUpdate(s *discordgo.Session, u *discordgo.VoiceStateUpdate)
 
 	// check cool down
 	if cd, vl := cooldown.IsOnCooldown(u.UserID, 5*time.Second); cd {
+		// TODO: Use from config
 		log.Println("⏰  User", u.UserID, "on cool down! ( VL:", vl, ")")
 		return
 	}

@@ -11,6 +11,7 @@ func (us *UserVoiceStateSession) MentionUser() string {
 }
 
 func (us *UserVoiceStateSession) UserJoin() {
+	// TODO: Use from config
 	log.Println("👋", us.UserID, "joined", us.ChannelID)
 
 	// find channel
@@ -51,6 +52,7 @@ func (us *UserVoiceStateSession) UserJoin() {
 }
 
 func (us *UserVoiceStateSession) UserLeave() {
+	// TODO: Use from config
 	log.Println("🚪", us.UserID, "left", us.ChannelID)
 
 	if us.Previous == nil {

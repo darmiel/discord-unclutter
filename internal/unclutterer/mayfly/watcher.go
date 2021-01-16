@@ -11,6 +11,7 @@ import (
 var mayflies = list.New()
 
 func DeleteNotifications(session *discordgo.Session, cancel chan bool) {
+	// TODO: Use from config
 	ticker := time.NewTicker(1 * time.Second)
 
 	for {

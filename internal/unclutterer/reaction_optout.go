@@ -60,8 +60,7 @@ func HandleMessageReactionAdd(s *discordgo.Session, ev *discordgo.MessageReactio
 		return
 	}
 
-	log.Println("has prefix!")
-
+	// TODO: Use from config
 	msg, _ := s.ChannelMessageSend(ev.ChannelID, "[ <@"+ev.UserID+"> ] 👉 **Opt-Out** Ghost-Pings ... (loading)")
 	mayfly.QueueDefault(msg)
 
@@ -70,6 +69,7 @@ func HandleMessageReactionAdd(s *discordgo.Session, ev *discordgo.MessageReactio
 		log.Println("Error opt-out:", err)
 
 		if msg != nil {
+			// TODO: Use from config
 			_, _ = s.ChannelMessageEdit(ev.ChannelID, msg.ID, "[ <@"+ev.UserID+"> ] 👉 😡 **Nope:** "+err.Error())
 		}
 	} else {
@@ -78,6 +78,7 @@ func HandleMessageReactionAdd(s *discordgo.Session, ev *discordgo.MessageReactio
 			_, _ = s.ChannelMessageEdit(
 				ev.ChannelID,
 				msg.ID,
+				// TODO: Use from config
 				"[ <@"+ev.UserID+"> | https://tenor.com/wroQ.gif ] 👉 😊 Okay! Du erhältst keine weiteren Ghost-Pings",
 			)
 		}
@@ -108,6 +109,7 @@ func HandleMessageReactionRemove(s *discordgo.Session, ev *discordgo.MessageReac
 		return
 	}
 
+	// TODO: Use from config
 	msg, _ := s.ChannelMessageSend(ev.ChannelID, "[ <@"+ev.UserID+"> ] 👈 **Opt-In** Ghost-Pings ... (loading)")
 	mayfly.QueueDefault(msg)
 
@@ -116,6 +118,7 @@ func HandleMessageReactionRemove(s *discordgo.Session, ev *discordgo.MessageReac
 		log.Println("Error opt-in:", err)
 
 		if msg != nil {
+			// TODO: Use from config
 			_, _ = s.ChannelMessageEdit(ev.ChannelID, msg.ID, "[ <@"+ev.UserID+"> ] 👈 😡 **Nope:** "+err.Error())
 		}
 	} else {
@@ -124,6 +127,7 @@ func HandleMessageReactionRemove(s *discordgo.Session, ev *discordgo.MessageReac
 			_, _ = s.ChannelMessageEdit(
 				ev.ChannelID,
 				msg.ID,
+				// TODO: Use from config
 				"[ <@"+ev.UserID+"> | https://tenor.com/v4hv.gif ] 👈 😊 Okay! Du erhältst wieder Ghost-Pings",
 			)
 		}
