@@ -19,3 +19,67 @@ LEAVE:
 2021/01/15 21:23:45   channel:  user: 150347348088848384 guild: 779370167699898399
 2021/01/15 21:23:45 Previous-State: &{150347348088848384 f666b9e60388a90ec7491e013c886e82 799732735282380810 779370167699898399 false true false false false}
 2021/01/15 21:23:45   channel: 799732735282380810 user: 150347348088848384 guild: 779370167699898399
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+---
+Join
+
+ChannelID: 779370167699898403
+GuildID: 779370167699898399
+Suppress: false
+SelfMute: false
+SelfDeaf: false
+---
+
+---
+Mute
+
+ChannelID: 779370167699898403
+GuildID: 779370167699898399
+Suppress: false
+SelfMute: true
+SelfDeaf: false
+---
+
+---
+Unmute
+
+ChannelID: 779370167699898403
+GuildID: 779370167699898399
+Suppress: false
+SelfMute: false
+SelfDeaf: false
+Mute: false
+Deaf: false
+---
+
+
+---
+Leave
+
+ChannelID:
+GuildID: 779370167699898399
+Suppress: false
+SelfMute: false
+SelfDeaf: false
+---

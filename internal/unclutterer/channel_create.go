@@ -77,7 +77,7 @@ func (us *UserVoiceStateSession) CreateChannel(parentID string) (channel *discor
 
 func (us *UserVoiceStateSession) SendWelcomeMessage(channel *discordgo.Channel, voiceChannel *discordgo.Channel) (message *discordgo.Message, err error) {
 	var text = ReactionCommand + `
-Hallo [ @everyone | https://i.imgur.com/aHX3n0z.png ]!
+Hallo! [ https://i.imgur.com/aHX3n0z.png ]
 
 Dieser Channel wurde für den Voice-Channel ` + "`" + voiceChannel.Name + "`" + ` erstellt.
 Er wird nur dann sichtbar, wenn du in diesen Voice-Channel gehst. (Privater Textkanal für Sprachkanäle).
