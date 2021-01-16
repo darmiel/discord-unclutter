@@ -2,10 +2,12 @@ package unclutterer
 
 import (
 	"github.com/bwmarrin/discordgo"
+	"github.com/darmiel/discord-unclutterer/internal/unclutterer/cooldown"
 	"github.com/darmiel/discord-unclutterer/internal/unclutterer/database"
 	"github.com/darmiel/discord-unclutterer/internal/unclutterer/mayfly"
 	"log"
 	"strings"
+	"time"
 )
 
 var messageCache = make(map[string]*discordgo.Message)
@@ -29,14 +31,23 @@ func getMessage(s *discordgo.Session, channelID string, messageID string) (messa
 	return
 }
 
-func HandleMessageReactionAdd(s *discordgo.Session, ev *discordgo.MessageReactionAdd) {
+func CheckCooldown(u string) bool {
+	c, _ := cooldown.IsOnCooldown(u+":opt::in+out", 4*time.Second)
+	return c
+}
 
+func HandleMessageReactionAdd(s *discordgo.Session, ev *discordgo.MessageReactionAdd) {
 	// Ignore self
 	if ev.UserID == s.State.User.ID {
 		return
 	}
 
 	if ev.Emoji.Name != Reaction {
+		return
+	}
+
+	// check cool down
+	if CheckCooldown(ev.UserID) {
 		return
 	}
 
@@ -74,13 +85,17 @@ func HandleMessageReactionAdd(s *discordgo.Session, ev *discordgo.MessageReactio
 }
 
 func HandleMessageReactionRemove(s *discordgo.Session, ev *discordgo.MessageReactionRemove) {
-
 	// Ignore self
 	if ev.UserID == s.State.User.ID {
 		return
 	}
 
 	if ev.Emoji.Name != Reaction {
+		return
+	}
+
+	// check cool down
+	if CheckCooldown(ev.UserID) {
 		return
 	}
 

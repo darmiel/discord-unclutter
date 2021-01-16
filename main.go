@@ -72,6 +72,6 @@ func main() {
 	if err := discord.Close(); err != nil {
 		log.Println("❌ Discord (Session) could not be closed:", err)
 	} else {
-		log.Println("✅ Discord (Session) closed.")
+		log.Println("✅  Discord (Session) closed.")
 	}
 }

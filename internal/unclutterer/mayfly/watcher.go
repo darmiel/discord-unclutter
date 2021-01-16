@@ -57,7 +57,7 @@ func DeleteNotifications(session *discordgo.Session, cancel chan bool) {
 					if err := session.ChannelMessageDelete(msg.ChannelID, msg.ID); err != nil {
 						log.Println("  └ ❌", err)
 					} else {
-						log.Println("  └ ✅ Message deleted.")
+						log.Println("  └ ✅  Message deleted.")
 					}
 
 					mayflies.Remove(e)

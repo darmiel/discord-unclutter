@@ -4,6 +4,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/darmiel/discord-unclutterer/internal/unclutterer/cooldown"
 	"log"
+	"time"
 )
 
 func HandleVoiceStateUpdate(s *discordgo.Session, u *discordgo.VoiceStateUpdate) {
@@ -29,11 +30,8 @@ func HandleVoiceStateUpdate(s *discordgo.Session, u *discordgo.VoiceStateUpdate)
 	}
 
 	// check cool down
-	if cd, vl := cooldown.IsOnCooldown(u.UserID); cd {
-		log.Println("(Voice Switch) ⏰ User", u.UserID, "on cooldown! ( VL:", vl, ")")
-		if vl >= 3 {
-			log.Println("(Voice Switch)    └ WARN: User", u.UserID, "has a high amount of violations!")
-		}
+	if cd, vl := cooldown.IsOnCooldown(u.UserID, 5*time.Second); cd {
+		log.Println("⏰  User", u.UserID, "on cooldown! ( VL:", vl, ")")
 		return
 	}
 

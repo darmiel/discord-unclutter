@@ -55,7 +55,7 @@ func StartCleanup(s *discordgo.Session) {
 				if err := unclutterer.RevokeAccess(s, perm.ID, channel.ID, false); err != nil {
 					log.Println("       ├ ❌", err)
 				} else {
-					log.Println("       ├ ✅", perm.ID)
+					log.Println("       ├ ✅ ", perm.ID)
 					cleared = true
 				}
 			}

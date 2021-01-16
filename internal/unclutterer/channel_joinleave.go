@@ -11,7 +11,7 @@ func (us *UserVoiceStateSession) MentionUser() string {
 }
 
 func (us *UserVoiceStateSession) UserJoin() {
-	log.Println("User", us.UserID, "joined", "channel", us.ChannelID, "from guild", us.GuildID)
+	log.Println("👋", us.UserID, "joined", us.ChannelID)
 
 	// find channel
 	if channelPair, err := us.findOrCreateText(us.ChannelID); err != nil {
@@ -51,12 +51,11 @@ func (us *UserVoiceStateSession) UserJoin() {
 }
 
 func (us *UserVoiceStateSession) UserLeave() {
+	log.Println("🚪", us.UserID, "left", us.ChannelID)
+
 	if us.Previous == nil {
-		log.Println("User", us.UserID, "left unknown channel.")
 		return
 	}
-
-	log.Println("User", us.UserID, "left", "channel", us.Previous.ChannelID, "from guild", us.GuildID)
 
 	// find channel
 	if channelPair, err := us.findOrCreateText(us.Previous.ChannelID); err != nil {

@@ -91,9 +91,6 @@ func (us *UserVoiceStateSession) findOrCreateText(voiceChannelID string) (chcat 
 		catChannel = catC
 	}
 
-	log.Println("ch-channel:", chID, chChannel)
-	log.Println("cat-channel:", catID, catChannel)
-
 	// create channels, if necessary
 	if catChannel == nil {
 		if channel, err := us.CreateCategory(); err != nil {
