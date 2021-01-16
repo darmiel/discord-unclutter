@@ -11,6 +11,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 )
 
 var (
@@ -60,6 +61,14 @@ func main() {
 		mayfly.DeleteNotifications(discord, done)
 	}()
 	//
+
+	// update activity
+	if err := discord.UpdateStatus(
+		int(time.Now().UnixNano()/int64(1000000)),
+		"Bug-Report 👉 github.com/darmiel/discord-unclutterer",
+	); err != nil {
+		log.Println("❌ Error updating status:", err)
+	}
 
 	fmt.Println("Bot is now running.  Press CTRL-C to exit.")
 	sc := make(chan os.Signal, 1)
