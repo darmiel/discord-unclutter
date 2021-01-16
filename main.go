@@ -35,7 +35,7 @@ func main() {
 	}
 
 	discord.AddHandler(func(s *discordgo.Session, u *discordgo.VoiceStateUpdate) {
-		sess := &unclutterer.UserSess{
+		sess := &unclutterer.UserVoiceStateSession{
 			UserID:    u.UserID,
 			ChannelID: u.ChannelID,
 			GuildID:   u.GuildID,
@@ -144,10 +144,21 @@ func main() {
 		fmt.Println("CHAT |", channel.Name, "(", e.Author.Username, "):", e.Content)
 	})
 
+	discord.AddHandler(unclutterer.HandleMessageReactionAdd)
+	discord.AddHandler(unclutterer.HandleMessageReactionRemove)
+
+	done := make(chan bool)
+	go func() {
+		unclutterer.DeleteNotifications(discord, done)
+	}()
+
 	fmt.Println("Bot is now running.  Press CTRL-C to exit.")
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
 	<-sc
+
+	// cancel delete
+	done <- true
 
 	log.Println("Close:", discord.Close())
 }

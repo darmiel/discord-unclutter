@@ -5,7 +5,12 @@ import (
 	"log"
 )
 
-func (us *UserSess) CreateCategory() (channel *discordgo.Channel, err error) {
+const (
+	Reaction        = "🖕"
+	ReactionCommand = "cmd::opt+in:out"
+)
+
+func (us *UserVoiceStateSession) CreateCategory() (channel *discordgo.Channel, err error) {
 	log.Println("🎉🐈 Creating category", CategoryName)
 	channel, err = us.Session.GuildChannelCreateComplex(us.GuildID, discordgo.GuildChannelCreateData{
 		Name: CategoryName,
@@ -14,7 +19,7 @@ func (us *UserSess) CreateCategory() (channel *discordgo.Channel, err error) {
 	return
 }
 
-func (us *UserSess) CreateChannel(parentID string) (channel *discordgo.Channel, err error) {
+func (us *UserVoiceStateSession) CreateChannel(parentID string) (channel *discordgo.Channel, err error) {
 	log.Println("🎉📺 Creating channel for voice", us.ChannelID)
 
 	// permissions
@@ -50,6 +55,45 @@ func (us *UserSess) CreateChannel(parentID string) (channel *discordgo.Channel, 
 		Topic:                TopicPrefix + us.ChannelID,
 		PermissionOverwrites: permissions,
 	})
+
+	log.Println("Channel:", channel, "err:", err)
+	if channel != nil && err == nil {
+		log.Print("  └ Creating welcome message")
+		if _, err := us.SendWelcomeMessage(channel, voiceChannel); err != nil {
+			log.Println("ERROR sending welcome message:", err)
+		}
+	}
+
+	return
+}
+
+func (us *UserVoiceStateSession) SendWelcomeMessage(channel *discordgo.Channel, voiceChannel *discordgo.Channel) (message *discordgo.Message, err error) {
+	var text = ReactionCommand + `
+Hallo [ @everyone | https://i.imgur.com/aHX3n0z.png ]!
+
+Dieser Channel wurde für den Voice-Channel ` + "`" + voiceChannel.Name + "`" + ` erstellt.
+Er wird nur dann sichtbar, wenn du in diesen Voice-Channel gehst. (Privater Textkanal für Sprachkanäle).
+
+Jedes Mal, wenn du Zugriff zu einem solchen Text-Channel bekommst, erhälst du einen Ghost-Ping.
+Möchtest du diese Ghost-Pings nicht mehr erhalten, klicke auf '` + Reaction + `'`
+
+	// send message
+	log.Println("    └ Sending message")
+	message, err = us.Session.ChannelMessageSend(channel.ID, text)
+	if err != nil {
+		return
+	}
+
+	// add middle finger reaction
+	log.Println("    └ Adding reaction")
+	err = us.Session.MessageReactionAdd(channel.ID, message.ID, Reaction)
+	if err != nil {
+		return
+	}
+
+	// pin message
+	log.Println("    └ Pin")
+	err = us.Session.ChannelMessagePin(channel.ID, message.ID)
 
 	return
 }

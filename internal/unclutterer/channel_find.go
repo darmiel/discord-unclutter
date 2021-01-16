@@ -36,7 +36,7 @@ func FindCreatedTextChannels(s *discordgo.Session, guildID string) (channels []*
 	return
 }
 
-func (us *UserSess) findOrCreateText(voiceChannelID string) (chcat *ChannelCategory, err error) {
+func (us *UserVoiceStateSession) findOrCreateText(voiceChannelID string) (chcat *ChannelCategory, err error) {
 	if voiceChannelID == "" {
 		return nil, errors.New("empty voice channel id")
 	}

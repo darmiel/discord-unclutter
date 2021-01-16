@@ -13,7 +13,7 @@ type UnclutteredChannel struct {
 	VoiceChannelID string
 }
 
-type UserSess struct {
+type UserVoiceStateSession struct {
 	UserID    string
 	ChannelID string
 	GuildID   string

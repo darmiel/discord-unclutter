@@ -1,10 +1,16 @@
 package unclutterer
 
 import (
+	"github.com/darmiel/discord-unclutterer/internal/unclutterer/database"
 	"log"
+	"time"
 )
 
-func (us *UserSess) UserJoin() {
+func (us *UserVoiceStateSession) MentionUser() string {
+	return "<@" + us.UserID + ">"
+}
+
+func (us *UserVoiceStateSession) UserJoin() {
 	log.Println("User", us.UserID, "joined", "channel", us.ChannelID, "from guild", us.GuildID)
 
 	// find channel
@@ -19,17 +25,32 @@ func (us *UserSess) UserJoin() {
 			return
 		}
 
-		// ping user
-		if _, err := us.Session.ChannelMessageSend(
-			textChannel.ID,
-			"✅ <@"+us.UserID+"> wurde hinzugefügt 👋",
-		); err != nil {
-			log.Println("ERROR sending message:", err)
+		t := time.Now()
+		// check if user wants to receive ghost pings (opt-out)
+		block, err := database.BlocksGhostping(us.UserID)
+		log.Println("👻 Ghost-Ping Get Result:", block, err)
+		if err != nil {
+			log.Println("💾 Database (Ghost-Ping) Error:", err)
+			return
+		}
+		log.Println("   └ Get Blocks took", time.Now().Unix()-t.Unix(), "s")
+
+		// make ghost ping
+		if !block {
+			send, err := us.Session.ChannelMessageSend(textChannel.ID, us.MentionUser())
+			if err != nil {
+				log.Println("   └ 👻 Ghost-Ping Create Error:", err)
+				return
+			}
+
+			if err := us.Session.ChannelMessageDelete(textChannel.ID, send.ID); err != nil {
+				log.Println("   └ 👻 Ghost-Ping Delete Error:", err)
+			}
 		}
 	}
 }
 
-func (us *UserSess) UserLeave() {
+func (us *UserVoiceStateSession) UserLeave() {
 	if us.Previous == nil {
 		log.Println("User", us.UserID, "left unknown channel.")
 		return
@@ -47,14 +68,6 @@ func (us *UserSess) UserLeave() {
 		if err := RevokeAccess(us.Session, us.UserID, textChannel.ID, false); err != nil {
 			log.Println("ERROR: Revoking Access (", textChannel.Name, ") for", us.UserID, ":", err)
 			return
-		}
-
-		// ping user
-		if _, err := us.Session.ChannelMessageSend(
-			textChannel.ID,
-			"🚪 <@"+us.UserID+"> wurde entfernt 👋",
-		); err != nil {
-			log.Println("ERROR sending message:", err)
 		}
 	}
 }
