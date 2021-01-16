@@ -1,53 +1,14 @@
 package unclutterer
 
 import (
-	"container/list"
 	"github.com/bwmarrin/discordgo"
 	"github.com/darmiel/discord-unclutterer/internal/unclutterer/database"
+	"github.com/darmiel/discord-unclutterer/internal/unclutterer/mayfly"
 	"log"
 	"strings"
-	"time"
 )
 
 var messageCache = make(map[string]*discordgo.Message)
-var messageNotif = list.New()
-
-func DeleteNotifications(s *discordgo.Session, c chan bool) {
-	ticker := time.NewTicker(1 * time.Second)
-
-	for {
-		select {
-		case <-c:
-			log.Println("Stop deleting notifications")
-			return
-		case <-ticker.C:
-			for e := messageNotif.Front(); e != nil; e = e.Next() {
-				msg, ok := e.Value.(*discordgo.Message)
-				if !ok {
-					log.Println("Error with element:", *e)
-					continue
-				}
-
-				parse, err := msg.Timestamp.Parse()
-				if err != nil {
-					log.Println("Error parsing time on element:", *e)
-					continue
-				}
-
-				if parse.Before(time.Now().Add(-10 * time.Second)) {
-					// delete message
-					log.Println("Delete message")
-
-					if err := s.ChannelMessageDelete(msg.ChannelID, msg.ID); err != nil {
-						log.Println("  └ ❌", err)
-					}
-
-					messageNotif.Remove(e)
-				}
-			}
-		}
-	}
-}
 
 func getMessage(s *discordgo.Session, channelID string, messageID string) (message *discordgo.Message) {
 	log.Println("☎️ Get message", messageID)
@@ -91,9 +52,7 @@ func HandleMessageReactionAdd(s *discordgo.Session, ev *discordgo.MessageReactio
 	log.Println("has prefix!")
 
 	msg, _ := s.ChannelMessageSend(ev.ChannelID, "[ <@"+ev.UserID+"> ] 👉 **Opt-Out** Ghost-Pings ... (loading)")
-	if msg != nil {
-		messageNotif.PushBack(msg)
-	}
+	mayfly.QueueDefault(msg)
 
 	// opt out
 	if err := database.SetBlocksGhostping(ev.UserID, true); err != nil {
@@ -135,9 +94,7 @@ func HandleMessageReactionRemove(s *discordgo.Session, ev *discordgo.MessageReac
 	}
 
 	msg, _ := s.ChannelMessageSend(ev.ChannelID, "[ <@"+ev.UserID+"> ] 👈 **Opt-In** Ghost-Pings ... (loading)")
-	if msg != nil {
-		messageNotif.PushBack(msg)
-	}
+	mayfly.QueueDefault(msg)
 
 	// opt out
 	if err := database.SetBlocksGhostping(ev.UserID, false); err != nil {

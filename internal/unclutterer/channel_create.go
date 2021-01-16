@@ -86,21 +86,21 @@ Jedes Mal, wenn du Zugriff zu einem solchen Text-Channel bekommst, erhältst du 
 Möchtest du diese Ghost-Pings nicht mehr erhalten, klicke auf '` + Reaction + `'`
 
 	// send message
-	log.Println("    └ Sending message")
+	log.Println("    └ 💌 Sending message")
 	message, err = us.Session.ChannelMessageSend(channel.ID, text)
 	if err != nil {
 		return
 	}
 
 	// add middle finger reaction
-	log.Println("    └ Adding reaction")
+	log.Println("    └ 👍 Adding reaction")
 	err = us.Session.MessageReactionAdd(channel.ID, message.ID, Reaction)
 	if err != nil {
 		return
 	}
 
 	// pin message
-	log.Println("    └ Pin")
+	log.Println("    └ 📌 Pin")
 	err = us.Session.ChannelMessagePin(channel.ID, message.ID)
 
 	return
