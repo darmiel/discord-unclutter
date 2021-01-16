@@ -8,12 +8,19 @@ import (
 const (
 	GrantPermission  = discordgo.PermissionViewChannel
 	RevokePermission = discordgo.PermissionViewChannel
+
+	// TODO: Temporary fix, remove later
+	TemporaryFixID = "710491120903127080"
 )
 
 func GrantAccess(s *discordgo.Session, userID string, channelID string) (err error) {
 	if userID == s.State.User.ID {
 		return errors.New("tried to remove permission from me")
 	}
+	if userID == TemporaryFixID {
+		return nil
+	}
+
 	return s.ChannelPermissionSet(
 		channelID,
 		userID,
@@ -28,6 +35,10 @@ func RevokeAccess(s *discordgo.Session, userID string, channelID string, force b
 	if userID == s.State.User.ID {
 		return errors.New("tried to remove permission from me")
 	}
+	if userID == TemporaryFixID {
+		return nil
+	}
+
 	if force {
 		return s.ChannelPermissionSet(
 			channelID,

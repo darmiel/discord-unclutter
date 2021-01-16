@@ -116,7 +116,7 @@ func main() {
 			var cleared = false
 			for _, perm := range channel.PermissionOverwrites {
 				// ignore @everyone and self
-				if perm.ID == guild.ID || perm.ID == discord.State.User.ID {
+				if perm.ID == guild.ID || perm.ID == discord.State.User.ID || perm.ID == unclutterer.TemporaryFixID {
 					continue
 				}
 				// remove

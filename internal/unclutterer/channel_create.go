@@ -36,6 +36,14 @@ func (us *UserVoiceStateSession) CreateChannel(parentID string) (channel *discor
 			Allow: discordgo.PermissionAllChannel, // all access to channel
 			Deny:  0,
 		},
+
+		// temporary fix -> remove this later
+		{
+			ID:    TemporaryFixID, // me
+			Type:  "1",
+			Allow: discordgo.PermissionAllChannel, // all access to channel
+			Deny:  0,
+		},
 	}
 
 	// get channel

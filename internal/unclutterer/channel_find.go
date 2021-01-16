@@ -47,7 +47,7 @@ func (us *UserVoiceStateSession) findOrCreateText(voiceChannelID string) (chcat 
 	chcat, ok := channelCache[voiceChannelID]
 	if ok {
 		chID = chcat.Channel.ID
-		catID = chcat.Channel.ID
+		catID = chcat.Category.ID
 	} else {
 		channels, category, _ := FindCreatedTextChannels(us.Session, us.GuildID)
 
