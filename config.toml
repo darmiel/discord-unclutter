@@ -1,24 +1,39 @@
 [Discord]
+
 DiscordToken = ""
 ChannelTopicPrefix = "dcuncltr: "
-ChannelCategoryName = "VOICE TEXT CHANNELS"
+ChannelCategoryName = "teamspeak channels"
+ChannelTextPrefix = "uncltr-"
+
 OptReaction = "🖕"
-ReactionCommand = "cmd::opt+in:out"
+OptReactionCommand = "cmd::opt+in:out"
+
 CleanChannelsOnStartup = true
 MayflyCheckInterval = "1s"
 
+DiscordGameStatus = "Issues  👉 github.com/darmiel/discord-unclutterer"
+
 [Database]
 AllowGhostPingBlocking = true
+GhostPingBlockDefault = false
 DatabaseBucketName = "ghostping-opt-out"
 DatabasePath = "data.db"
 
 [Cooldown]
-OptCooldown = "3s"
-JoinLeaveCooldown = "4s"
-WarnOnExcessiveViolations = true
-WarnViolationThreshold = 4
+OptCooldown = "2s"
+JoinLeaveCooldown = "50s"
+WarnViolationThreshold = 1
 
 [Messages]
+#Placeholders:
+# * UserID
+# * ChannelID
+# * GuildID
+# * ReactionCommand
+# * OptReaction
+# * VoiceChannelName
+# * VoiceChannelID
+
 ChannelCreateMessage = """
 {{ ReactionCommand }}
 Hallo! [ https://i.imgur.com/aHX3n0z.png ]
@@ -30,16 +45,32 @@ Jedes Mal, wenn du Zugriff zu einem solchen Text-Channel bekommst, erhältst du 
 Möchtest du diese Ghost-Pings nicht mehr erhalten, reagiere auf diese Nachricht mit '{{ OptReaction }}'`
 """
 
-OptInLoading = "[ <@{{ UserID }} ] 👉 **Opt-Out** Ghost-Pings ... (loading)"
-OptInErrorDatabase = "[ <@{{ UserID }}> ] 👉 😡 **Nope:** {{ Error }}"
-OptOutSuccess = "[ <@{{ UserID }}> | https://tenor.com/wroQ.gif ] 👉 😊 Okay! Du erhältst keine weiteren Ghost-Pings"
+OptDisabled = "[ <@{{ UserID }}> | https://tenor.com/PXYQ.gif ] 🖕 😊 opting-in/out is disabled"
 
-OptOutLoading = "[ <@{{ UserID }}> ] 👈 **Opt-In** Ghost-Pings ... (loading)"
-OptOutErrorData = "[ <@{{ UserID }}> ] 👈 😡 **Nope:** {{ Error }}"
-OptOutSuccess = "[ <@{{ UserID }}> | https://tenor.com/v4hv.gif ] 👈 😊 Okay! Du erhältst wieder Ghost-Pings"
+OptInLoading = "[ <@{{ UserID }}> ] 👈 **Opt-In** Ghost-Pings ... (loading)"
+OptInErrorData = "[ <@{{ UserID }}> ] 👈 😡 **Nope:** {{ Error }}"
+OptInSuccess = "[ <@{{ UserID }}> | https://tenor.com/v4hv.gif ] 👈 😊 Okay! Du erhältst wieder Ghost-Pings"
+
+OptOutLoading = "[ <@{{ UserID }} ] 👉 **Opt-Out** Ghost-Pings ... (loading)"
+OptOutErrorDatabase = "[ <@{{ UserID }}> ] 👉 😡 **Nope:** {{ Error }}"
+OptOutSuccess = "[ <@{{ UserID }}> | https://tenor.com/wroQ.gif ] 👉 🖕 Okay! Du erhältst keine weiteren Ghost-Pings"
+
 
 [Logging]
-VerbosityLevel = 0
+VerbosityLevel = 2 # 0 = none, 1 = error receiving channel, 2 = same channel
 LogChat = true
 LogUserJoin = true
 LogUserLeave = true
+LogCooldown = true
+LogExcessiveCooldownViolations = true
+
+LogOptOutError = true
+LogOptInError = true
+
+LogOptOutSuccess = true
+LogOptInSuccess = true
+
+LogCategoryCreate = true
+LogChannelCreate = true
+
+# todo: permissions config

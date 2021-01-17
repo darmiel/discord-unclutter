@@ -1,6 +1,9 @@
 package cooldown
 
-import "time"
+import (
+	duconfig "github.com/darmiel/discord-unclutterer/internal/unclutterer/config"
+	"time"
+)
 
 var (
 	cooldowns  = make(map[string]time.Time)
@@ -12,7 +15,7 @@ func SetOnCooldown(obj string, d time.Duration) {
 	violations[obj] = 0
 }
 
-func IsOnCooldown(obj string, d time.Duration) (cooldowned bool, vl uint64) {
+func IsOnCooldown(obj string, d time.Duration, config *duconfig.Config) (cooldowned bool, vl uint64) {
 	dura, ok := cooldowns[obj]
 
 	// if not cooldowned
@@ -32,7 +35,9 @@ func IsOnCooldown(obj string, d time.Duration) (cooldowned bool, vl uint64) {
 		}
 		vl++
 
-		CheckAndWarn(obj, vl)
+		if config != nil {
+			CheckAndWarn(obj, vl, config)
+		}
 
 		// update violations
 		violations[obj] = vl

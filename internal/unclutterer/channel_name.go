@@ -2,6 +2,7 @@ package unclutterer
 
 import (
 	"github.com/bwmarrin/discordgo"
+	duconfig "github.com/darmiel/discord-unclutterer/internal/unclutterer/config"
 	"regexp"
 	"strings"
 )
@@ -12,16 +13,9 @@ func init() {
 	channelNameRegex = regexp.MustCompile("[^\\w-_]]")
 }
 
-const (
-	// TODO: Use from config
-	TopicPrefix = "dcuncltr: "
-	// TODO: Use from config
-	CategoryName = "VOICE TEXT CHANNELS"
-)
-
-func extractChannelID(channel *discordgo.Channel) (voiceID string) {
-	if strings.HasPrefix(channel.Topic, TopicPrefix) {
-		return strings.TrimSpace(channel.Topic[len(TopicPrefix):])
+func extractChannelID(channel *discordgo.Channel, config *duconfig.Config) (voiceID string) {
+	if strings.HasPrefix(channel.Topic, config.ChannelTopicPrefix) {
+		return strings.TrimSpace(channel.Topic[len(config.ChannelTopicPrefix):])
 	}
 	return ""
 }

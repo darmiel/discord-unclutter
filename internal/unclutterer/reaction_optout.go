@@ -2,12 +2,12 @@ package unclutterer
 
 import (
 	"github.com/bwmarrin/discordgo"
+	duconfig "github.com/darmiel/discord-unclutterer/internal/unclutterer/config"
 	"github.com/darmiel/discord-unclutterer/internal/unclutterer/cooldown"
 	"github.com/darmiel/discord-unclutterer/internal/unclutterer/database"
 	"github.com/darmiel/discord-unclutterer/internal/unclutterer/mayfly"
 	"log"
 	"strings"
-	"time"
 )
 
 var messageCache = make(map[string]*discordgo.Message)
@@ -31,23 +31,23 @@ func getMessage(s *discordgo.Session, channelID string, messageID string) (messa
 	return
 }
 
-func CheckCooldown(u string) bool {
-	c, _ := cooldown.IsOnCooldown(u+":opt::in+out", 4*time.Second)
+func CheckCooldown(u string, config *duconfig.Config) bool {
+	c, _ := cooldown.IsOnCooldown(u+":opt::in+out", config.OptCooldown.Duration, config)
 	return c
 }
 
-func HandleMessageReactionAdd(s *discordgo.Session, ev *discordgo.MessageReactionAdd) {
+func HandleMessageReactionAdd(s *discordgo.Session, ev *discordgo.MessageReactionAdd, config *duconfig.Config) {
 	// Ignore self
 	if ev.UserID == s.State.User.ID {
 		return
 	}
 
-	if ev.Emoji.Name != Reaction {
+	if ev.Emoji.Name != config.OptReaction {
 		return
 	}
 
 	// check cool down
-	if CheckCooldown(ev.UserID) {
+	if CheckCooldown(ev.UserID, config) {
 		return
 	}
 
@@ -56,47 +56,62 @@ func HandleMessageReactionAdd(s *discordgo.Session, ev *discordgo.MessageReactio
 		return
 	}
 
-	if !strings.HasPrefix(message.Content, ReactionCommand) {
+	if !strings.HasPrefix(message.Content, config.OptReactionCommand) {
 		return
 	}
 
-	// TODO: Use from config
-	msg, _ := s.ChannelMessageSend(ev.ChannelID, "[ <@"+ev.UserID+"> ] 👉 **Opt-Out** Ghost-Pings ... (loading)")
+	msg, _ := s.ChannelMessageSend(ev.ChannelID, config.OptOutLoading.Repl("UserID", ev.UserID))
 	mayfly.QueueDefault(msg)
 
-	// opt out
-	if err := database.SetBlocksGhostping(ev.UserID, true); err != nil {
-		log.Println("Error opt-out:", err)
+	if !config.AllowGhostPingBlocking {
+		_, _ = s.ChannelMessageEdit(
+			ev.ChannelID,
+			msg.ID,
+			config.OptDisabled.Repl("UserID", ev.UserID),
+		)
+		return
+	}
 
-		if msg != nil {
-			// TODO: Use from config
-			_, _ = s.ChannelMessageEdit(ev.ChannelID, msg.ID, "[ <@"+ev.UserID+"> ] 👉 😡 **Nope:** "+err.Error())
+	// opt out
+	if err := database.SetBlocksGhostping(ev.UserID, true, config); err != nil {
+		if config.LogOptOutError {
+			log.Println("❌👉 Error opting-out for", ev.UserID, ":", err)
 		}
-	} else {
-		log.Println("Opt-out successful.")
+
 		if msg != nil {
 			_, _ = s.ChannelMessageEdit(
 				ev.ChannelID,
 				msg.ID,
-				// TODO: Use from config
-				"[ <@"+ev.UserID+"> | https://tenor.com/wroQ.gif ] 👉 😊 Okay! Du erhältst keine weiteren Ghost-Pings",
+				config.OptOutErrorData.Repl("UserID", ev.UserID, "Error", err.Error()),
+			)
+		}
+	} else {
+		if config.LogOptOutSuccess {
+			log.Println("✅ 👉 Opt-out for", ev.UserID, "successful.")
+		}
+
+		if msg != nil {
+			_, _ = s.ChannelMessageEdit(
+				ev.ChannelID,
+				msg.ID,
+				config.OptOutSuccess.Repl("UserID", ev.UserID),
 			)
 		}
 	}
 }
 
-func HandleMessageReactionRemove(s *discordgo.Session, ev *discordgo.MessageReactionRemove) {
+func HandleMessageReactionRemove(s *discordgo.Session, ev *discordgo.MessageReactionRemove, config *duconfig.Config) {
 	// Ignore self
 	if ev.UserID == s.State.User.ID {
 		return
 	}
 
-	if ev.Emoji.Name != Reaction {
+	if ev.Emoji.Name != config.OptReaction {
 		return
 	}
 
 	// check cool down
-	if CheckCooldown(ev.UserID) {
+	if CheckCooldown(ev.UserID, config) {
 		return
 	}
 
@@ -105,30 +120,45 @@ func HandleMessageReactionRemove(s *discordgo.Session, ev *discordgo.MessageReac
 		return
 	}
 
-	if !strings.HasPrefix(message.Content, ReactionCommand) {
+	if !strings.HasPrefix(message.Content, config.OptReactionCommand) {
 		return
 	}
 
-	// TODO: Use from config
-	msg, _ := s.ChannelMessageSend(ev.ChannelID, "[ <@"+ev.UserID+"> ] 👈 **Opt-In** Ghost-Pings ... (loading)")
+	msg, _ := s.ChannelMessageSend(ev.ChannelID, config.OptInLoading.Repl("UserID", ev.UserID))
 	mayfly.QueueDefault(msg)
 
-	// opt out
-	if err := database.SetBlocksGhostping(ev.UserID, false); err != nil {
-		log.Println("Error opt-in:", err)
+	if !config.AllowGhostPingBlocking {
+		_, _ = s.ChannelMessageEdit(
+			ev.ChannelID,
+			msg.ID,
+			config.OptDisabled.Repl("UserID", ev.UserID),
+		)
+		return
+	}
 
-		if msg != nil {
-			// TODO: Use from config
-			_, _ = s.ChannelMessageEdit(ev.ChannelID, msg.ID, "[ <@"+ev.UserID+"> ] 👈 😡 **Nope:** "+err.Error())
+	// opt in
+	if err := database.SetBlocksGhostping(ev.UserID, false, config); err != nil {
+		if config.LogOptInError {
+			log.Println("❌👈 Error opting-in for", ev.UserID, ":", err)
 		}
-	} else {
-		log.Println("Opt-in successful.")
+
 		if msg != nil {
 			_, _ = s.ChannelMessageEdit(
 				ev.ChannelID,
 				msg.ID,
-				// TODO: Use from config
-				"[ <@"+ev.UserID+"> | https://tenor.com/v4hv.gif ] 👈 😊 Okay! Du erhältst wieder Ghost-Pings",
+				config.OptInErrorDatabase.Repl("UserID", ev.UserID, "Error", err.Error()),
+			)
+		}
+	} else {
+		if config.LogOptInSuccess {
+			log.Println("✅ 👈 Opt-in for", ev.UserID, "successful.")
+		}
+
+		if msg != nil {
+			_, _ = s.ChannelMessageEdit(
+				ev.ChannelID,
+				msg.ID,
+				config.OptInSuccess.Repl("UserID", ev.UserID),
 			)
 		}
 	}

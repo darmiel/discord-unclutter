@@ -1,6 +1,9 @@
 package unclutterer
 
-import "github.com/bwmarrin/discordgo"
+import (
+	"github.com/bwmarrin/discordgo"
+	duconfig "github.com/darmiel/discord-unclutterer/internal/unclutterer/config"
+)
 
 // ChannelCategory is a tuple of a channel and the category
 type ChannelCategory struct {
@@ -19,4 +22,5 @@ type UserVoiceStateSession struct {
 	GuildID   string
 	Session   *discordgo.Session
 	Previous  *discordgo.VoiceState
+	config    *duconfig.Config
 }

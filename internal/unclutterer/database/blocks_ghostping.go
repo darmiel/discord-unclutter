@@ -1,28 +1,21 @@
 package database
 
 import (
+	duconfig "github.com/darmiel/discord-unclutterer/internal/unclutterer/config"
 	bolt "go.etcd.io/bbolt"
 	"log"
-	"time"
 )
 
-// TODO: Use from config
 //goland:noinspection GoUnhandledErrorResult
-func BlocksGhostping(userID string) (block bool, err error) {
-	db, err := bolt.Open(
-		Path,
-		0666,
-		&bolt.Options{Timeout: 1 * time.Second}, // if the db file has a lock, the application would hang until released
-	)
+func BlocksGhostping(userID string, config *duconfig.Config) (block bool, err error) {
+	db, err := open(config)
 	if err != nil {
 		return false, err
 	}
 	defer db.Close()
 
 	err = db.Update(func(tx *bolt.Tx) error {
-		// check if bucket "ghostping-opt-out" exists
-		// TODO: Use from config
-		bucket, e := tx.CreateBucketIfNotExists(OptOutBucket)
+		bucket, e := tx.CreateBucketIfNotExists(bucketName)
 		if e != nil {
 			err = e
 			return e
