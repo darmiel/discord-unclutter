@@ -37,129 +37,106 @@ func CheckCooldown(u string, config *duconfig.Config) bool {
 }
 
 func HandleMessageReactionAdd(s *discordgo.Session, ev *discordgo.MessageReactionAdd, config *duconfig.Config) {
-	// Ignore self
-	if ev.UserID == s.State.User.ID {
-		return
-	}
-
-	if ev.Emoji.Name != config.OptReaction {
-		return
-	}
-
-	// check cool down
-	if CheckCooldown(ev.UserID, config) {
-		return
-	}
-
-	message := getMessage(s, ev.ChannelID, ev.MessageID)
-	if message == nil {
-		return
-	}
-
-	if !strings.HasPrefix(message.Content, config.OptReactionCommand) {
-		return
-	}
-
-	msg, _ := s.ChannelMessageSend(ev.ChannelID, config.OptOutLoading.Repl("UserID", ev.UserID))
-	mayfly.QueueDefault(msg)
-
-	if !config.AllowGhostPingBlocking {
-		_, _ = s.ChannelMessageEdit(
-			ev.ChannelID,
-			msg.ID,
-			config.OptDisabled.Repl("UserID", ev.UserID),
-		)
-		return
-	}
-
-	// opt out
-	if err := database.SetBlocksGhostping(ev.UserID, true, config); err != nil {
-		if config.LogOptOutError {
-			log.Println("❌👉 Error opting-out for", ev.UserID, ":", err)
-		}
-
-		if msg != nil {
-			_, _ = s.ChannelMessageEdit(
-				ev.ChannelID,
-				msg.ID,
-				config.OptOutErrorData.Repl("UserID", ev.UserID, "Error", err.Error()),
-			)
-		}
-	} else {
-		if config.LogOptOutSuccess {
-			log.Println("✅ 👉 Opt-out for", ev.UserID, "successful.")
-		}
-
-		if msg != nil {
-			_, _ = s.ChannelMessageEdit(
-				ev.ChannelID,
-				msg.ID,
-				config.OptOutSuccess.Repl("UserID", ev.UserID),
-			)
-		}
-	}
+	opt(s, ev.MessageReaction, true, config)
 }
 
 func HandleMessageReactionRemove(s *discordgo.Session, ev *discordgo.MessageReactionRemove, config *duconfig.Config) {
+	opt(s, ev.MessageReaction, false, config)
+}
+
+func opt(s *discordgo.Session, reaction *discordgo.MessageReaction, block bool, config *duconfig.Config) {
+
 	// Ignore self
-	if ev.UserID == s.State.User.ID {
+	if reaction.UserID == s.State.User.ID {
 		return
 	}
-
-	if ev.Emoji.Name != config.OptReaction {
+	if reaction.Emoji.Name != config.OptReaction {
 		return
 	}
-
 	// check cool down
-	if CheckCooldown(ev.UserID, config) {
+	if CheckCooldown(reaction.UserID, config) {
 		return
 	}
-
-	message := getMessage(s, ev.ChannelID, ev.MessageID)
+	message := getMessage(s, reaction.ChannelID, reaction.MessageID)
 	if message == nil {
 		return
 	}
-
 	if !strings.HasPrefix(message.Content, config.OptReactionCommand) {
 		return
 	}
 
-	msg, _ := s.ChannelMessageSend(ev.ChannelID, config.OptInLoading.Repl("UserID", ev.UserID))
+	var msg *discordgo.Message
+
+	if block {
+		msg, _ = s.ChannelMessageSend(
+			reaction.ChannelID,
+			config.OptOutLoading.Repl("UserID", reaction.UserID),
+		)
+	} else {
+		msg, _ = s.ChannelMessageSend(
+			reaction.ChannelID,
+			config.OptInLoading.Repl("UserID", reaction.UserID),
+		)
+	}
 	mayfly.QueueDefault(msg)
 
 	if !config.AllowGhostPingBlocking {
 		_, _ = s.ChannelMessageEdit(
-			ev.ChannelID,
+			reaction.ChannelID,
 			msg.ID,
-			config.OptDisabled.Repl("UserID", ev.UserID),
+			config.OptDisabled.Repl("UserID", reaction.UserID),
 		)
 		return
 	}
 
-	// opt in
-	if err := database.SetBlocksGhostping(ev.UserID, false, config); err != nil {
-		if config.LogOptInError {
-			log.Println("❌👈 Error opting-in for", ev.UserID, ":", err)
+	// opt in/out
+	if err := database.SetBlocksGhostping(reaction.UserID, block, config); err != nil {
+		if config.LogOptOutError {
+			if block {
+				log.Println("❌👉 Error opting-out for", reaction.UserID, ":", err)
+			} else {
+				log.Println("❌👉 Error opting-in for", reaction.UserID, ":", err)
+			}
 		}
 
 		if msg != nil {
-			_, _ = s.ChannelMessageEdit(
-				ev.ChannelID,
-				msg.ID,
-				config.OptInErrorDatabase.Repl("UserID", ev.UserID, "Error", err.Error()),
-			)
+			if block {
+				_, _ = s.ChannelMessageEdit(
+					reaction.ChannelID,
+					msg.ID,
+					config.OptOutErrorData.Repl("UserID", reaction.UserID, "Error", err.Error()),
+				)
+			} else {
+				_, _ = s.ChannelMessageEdit(
+					reaction.ChannelID,
+					msg.ID,
+					config.OptInErrorDatabase.Repl("UserID", reaction.UserID, "Error", err.Error()),
+				)
+			}
 		}
 	} else {
-		if config.LogOptInSuccess {
-			log.Println("✅ 👈 Opt-in for", ev.UserID, "successful.")
+		if config.LogOptOutSuccess {
+			if block {
+				log.Println("✅ 👉 Opt-out for", reaction.UserID, "successful.")
+			} else {
+				log.Println("✅ 👉 Opt-in for", reaction.UserID, "successful.")
+			}
 		}
 
 		if msg != nil {
-			_, _ = s.ChannelMessageEdit(
-				ev.ChannelID,
-				msg.ID,
-				config.OptInSuccess.Repl("UserID", ev.UserID),
-			)
+			if block {
+				_, _ = s.ChannelMessageEdit(
+					reaction.ChannelID,
+					msg.ID,
+					config.OptOutSuccess.Repl("UserID", reaction.UserID),
+				)
+			} else {
+				_, _ = s.ChannelMessageEdit(
+					reaction.ChannelID,
+					msg.ID,
+					config.OptInSuccess.Repl("UserID", reaction.UserID),
+				)
+			}
 		}
 	}
 }

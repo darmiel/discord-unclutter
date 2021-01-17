@@ -2,6 +2,7 @@ package mayfly
 
 import (
 	"github.com/bwmarrin/discordgo"
+	"log"
 	"time"
 )
 
@@ -21,6 +22,9 @@ func NewMessage(msg *discordgo.Message, delay time.Duration) *MayflyMessage {
 }
 
 func Queue(msg *discordgo.Message, delay time.Duration) {
+	if msg == nil {
+		log.Println("Skipped nil message on queue with duration:", delay)
+	}
 	message := NewMessage(msg, delay)
 	mayflies.PushBack(message)
 }
