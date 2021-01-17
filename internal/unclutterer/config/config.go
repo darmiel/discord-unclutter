@@ -7,11 +7,12 @@ import (
 )
 
 type Config struct {
-	DiscordConfig  `toml:"Discord"`
-	DatabaseConfig `toml:"Database"`
-	CooldownConfig `toml:"Cooldown"`
-	MessageConfig  `toml:"Messages"`
-	LoggingConfig  `toml:"Logging"`
+	DiscordConfig   `toml:"Discord"`
+	DatabaseConfig  `toml:"Database"`
+	CooldownConfig  `toml:"Cooldown"`
+	MessageConfig   `toml:"Messages"`
+	LoggingConfig   `toml:"Logging"`
+	GhostPingConfig `toml:"GhostPing"`
 }
 
 func LoadConfig() (conf *Config, err error) {

@@ -6,9 +6,6 @@ type DiscordConfig struct {
 	ChannelCategoryName string
 	ChannelTextPrefix   string
 
-	OptReaction        string
-	OptReactionCommand string
-
 	CleanChannelsOnStartup bool
 	MayflyCheckInterval    duration
 
