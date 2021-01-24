@@ -3,12 +3,13 @@ package unclutterer
 import (
 	"errors"
 	"github.com/bwmarrin/discordgo"
+	duconfig "github.com/darmiel/discord-unclutterer/internal/unclutterer/config"
 	"log"
 )
 
 var channelCache = make(map[string]*ChannelCategory)
 
-func FindCreatedTextChannels(s *discordgo.Session, guildID string) (channels []*UnclutteredChannel, category *discordgo.Channel, err error) {
+func FindCreatedTextChannels(s *discordgo.Session, guildID string, config *duconfig.Config) (channels []*UnclutteredChannel, category *discordgo.Channel, err error) {
 	allChannels, err := s.GuildChannels(guildID)
 	if err != nil {
 		return nil, nil, err
@@ -17,7 +18,7 @@ func FindCreatedTextChannels(s *discordgo.Session, guildID string) (channels []*
 	for _, c := range allChannels {
 		// check for category
 		if c.Type == discordgo.ChannelTypeGuildCategory {
-			if c.Name == CategoryName {
+			if c.Name == config.ChannelCategoryName {
 				category = c
 				continue
 			}
@@ -25,7 +26,7 @@ func FindCreatedTextChannels(s *discordgo.Session, guildID string) (channels []*
 
 		// check if text channel
 		if c.Type == discordgo.ChannelTypeGuildText {
-			if id := extractChannelID(c); id != "" {
+			if id := extractChannelID(c, config); id != "" {
 				channels = append(channels, &UnclutteredChannel{
 					Channel:        c,
 					VoiceChannelID: id,
@@ -33,6 +34,7 @@ func FindCreatedTextChannels(s *discordgo.Session, guildID string) (channels []*
 			}
 		}
 	}
+
 	return
 }
 
@@ -49,7 +51,7 @@ func (us *UserVoiceStateSession) findOrCreateText(voiceChannelID string) (chcat 
 		chID = chcat.Channel.ID
 		catID = chcat.Category.ID
 	} else {
-		channels, category, _ := FindCreatedTextChannels(us.Session, us.GuildID)
+		channels, category, _ := FindCreatedTextChannels(us.Session, us.GuildID, us.config)
 
 		if category != nil {
 			catID = category.ID

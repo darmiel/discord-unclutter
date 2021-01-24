@@ -3,14 +3,13 @@ package cleanup
 import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/darmiel/discord-unclutterer/internal/unclutterer"
+	duconfig "github.com/darmiel/discord-unclutterer/internal/unclutterer/config"
 	"log"
 )
 
 // StartCleanup checks all text channels if they have any users' permissions left
 // and removes them if necessary
-func StartCleanup(s *discordgo.Session) {
-	log.Println("🗑 Starting guild channel clear")
-
+func StartCleanup(s *discordgo.Session, config *duconfig.Config) {
 	guilds := s.State.Guilds
 	for gi, guild := range guilds {
 
@@ -26,7 +25,7 @@ func StartCleanup(s *discordgo.Session) {
 		log.Println(prefix, guild.ID, "(", guild.Name, ")")
 
 		// find channels
-		channels, _, _ := unclutterer.FindCreatedTextChannels(s, guild.ID)
+		channels, _, _ := unclutterer.FindCreatedTextChannels(s, guild.ID, config)
 		if channels == nil {
 			log.Println("Error checking guild:", guild.ID)
 			continue

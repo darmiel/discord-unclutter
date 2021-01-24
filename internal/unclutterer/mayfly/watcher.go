@@ -3,6 +3,7 @@ package mayfly
 import (
 	"container/list"
 	"github.com/bwmarrin/discordgo"
+	dcuconfig "github.com/darmiel/discord-unclutterer/internal/unclutterer/config"
 	"log"
 	"strings"
 	"time"
@@ -10,8 +11,8 @@ import (
 
 var mayflies = list.New()
 
-func DeleteNotifications(session *discordgo.Session, cancel chan bool) {
-	ticker := time.NewTicker(1 * time.Second)
+func DeleteNotifications(session *discordgo.Session, config *dcuconfig.Config, cancel chan bool) {
+	ticker := time.NewTicker(config.MayflyCheckInterval.Duration)
 
 	for {
 		select {

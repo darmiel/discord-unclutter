@@ -1,0 +1,138 @@
+[Discord]
+    # The Discord bot token with which the bot authenticates itself.
+    # Get your token at: http://discord.com/developers/applications
+    DiscordToken = "QjTvbup.DdxpcZvxnREp4dPjwxM_c#eK5dtH49aGYpscE2ehquBhsD7sufrjn3" # <-- example token
+
+    # This is the description of the text channels, which identifies this affiliation.
+    # If this description is changed, all text channels (created by the bot) have to be created again.
+    ChannelTopicPrefix = "dcuncltr: "
+
+    # This is the name of the category in which the text channels are created (parent channel)
+    ChannelCategoryName = "teamspeak channels"
+
+    # This prefix will be appended to the newly created text channels.
+    ChannelTextPrefix = "uncltr-"
+
+    # If CleanChannelsOnStartup is set to true,
+    # all text channels (created by the bot) are checked for residual user permissions at startup.
+    # This is because if the bot is stopped while there are still users in a (voice-) channel,
+    # the permissions in that channel will not be properly cleaned.
+    CleanChannelsOnStartup = true
+
+    # If messages should be deleted automatically after a time (for example the Opt-In / Out messages),
+    # a ticker will be started, which will check every ((MayflyCheckInterval)) (seconds, minutes, hours)
+    # if a message is older than X seconds and therefore should be deleted.
+    #
+    # Since this process is not very computationally intensive, and also runs in a goroutine,
+    # this value can be set to a low duration.
+    MayflyCheckInterval = "1s"
+
+    # This status is set by the bot as "current game" and is displayed in the member list under the name.
+    DiscordGameStatus = "Issues  👉 github.com/darmiel/discord-unclutterer"
+
+# If a user gains access to a text channel,
+# the user receives a ghost ping (the user is marked in a message, which is immediately deleted).
+[GhostPing]
+    # This ghost ping can be (de)activated when reacting to the sent message with the emoji ((OptReaction))
+    OptReaction = "🖕"
+
+    # For internal purposes, should be something unique
+    OptReactionCommand = "cmd::opt+in:out"
+
+    # Should a user have these ghost pings turned on/off?
+    AllowGhostPingBlocking = true
+
+    # Default value, which applies if not explicitly set.
+    # If ((AllowGhostPingBlocking)) is false, this value is always used.
+    GhostPingBlockDefault = false
+
+# (b)bolt is used as the embedded database system.
+# bbolt: https://github.com/etcd-io/bbolt
+[Database]
+    # Bucket name
+    DatabaseBucketName = "ghostping-opt-out"
+
+    # Database file path
+    DatabasePath = "data.db"
+
+# Certain actions, such as entering/leaving,
+# as well as opt-in/out for ghost pings have a cool-down to avoid flooding the Discord API,
+# or spamming messages into channels
+[Cooldown]
+    # Opt-In/Out cool-down
+    OptCooldown = "2s"
+
+    # Voice channel join/leave cool-down
+    JoinLeaveCooldown = "5s"
+
+    # If a cool down is exceeded more than ((WarnViolationThreshold)) within the period, a warning is sent,
+    # if ((Logging.LogExcessiveCooldownViolations)) is true
+    WarnViolationThreshold = 1
+
+# Messages sent by the bot
+# Some messages may contain placeholders with the format: {{ key }}.
+[Messages]
+    # This message will be sent to a newly created channel.
+    # The following placeholders can be used:
+    # UserID, ChannelID, GuildID, ReactionCommand, OptReaction, VoiceChannelName, VoiceChannelID
+    ChannelCreateMessage = """
+{{ ReactionCommand }}
+Hallo! [ https://i.imgur.com/aHX3n0z.png ]
+
+Dieser Channel wurde für den Voice-Channel `{{ VoiceChannelName }}` erstellt.
+Er wird nur dann sichtbar, wenn du in diesen Voice-Channel gehst. (Privater Textkanal für Sprachkanäle).
+
+Jedes Mal, wenn du Zugriff zu einem solchen Text-Channel bekommst, erhältst du einen Ghost-Ping.
+Möchtest du diese Ghost-Pings nicht mehr erhalten, reagiere auf diese Nachricht mit '{{ OptReaction }}'`
+"""
+
+    # The following placeholder(s) can be used:
+    # UserID
+    OptDisabled = "[ <@{{ UserID }}> | https://tenor.com/PXYQ.gif ] 🖕 😊 opting-in/out is disabled"
+
+    # OPT IN ---
+
+    # The following placeholder(s) can be used:
+    # UserID
+    OptInLoading = "[ <@{{ UserID }}> ] 👈 **Opt-In** Ghost-Pings ... (loading)"
+
+    # The following placeholder(s) can be used:
+    # UserID
+    OptInErrorData = "[ <@{{ UserID }}> ] 👈 😡 **Nope:** {{ Error }}"
+
+    # The following placeholder(s) can be used:
+    # UserID
+    OptInSuccess = "[ <@{{ UserID }}> | https://tenor.com/v4hv.gif ] 👈 😊 Okay! Du erhältst wieder Ghost-Pings"
+
+    # OPT OUT ---
+
+    # The following placeholder(s) can be used:
+    # UserID
+    OptOutLoading = "[ <@{{ UserID }} ] 👉 **Opt-Out** Ghost-Pings ... (loading)"
+
+    # The following placeholder(s) can be used:
+    # UserID
+    OptOutErrorDatabase = "[ <@{{ UserID }}> ] 👉 😡 **Nope:** {{ Error }}"
+
+    # The following placeholder(s) can be used:
+    # UserID
+    OptOutSuccess = "[ <@{{ UserID }}> | https://tenor.com/wroQ.gif ] 👉 🖕 Okay! Du erhältst keine weiteren Ghost-Pings"
+
+
+[Logging]
+    VerbosityLevel = 2 # 0 = none, 1 = error receiving channel, 2 = same channel
+    LogChat = true
+    LogUserJoin = true
+    LogUserLeave = true
+    LogCooldown = true
+    LogExcessiveCooldownViolations = true
+
+    LogOptOutError = true
+    LogOptInError = true
+
+    LogOptOutSuccess = true
+    LogOptInSuccess = true
+
+    LogCategoryCreate = true
+    LogChannelCreate = true
+    PingBindAddress = ":1340"
