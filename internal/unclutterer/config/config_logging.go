@@ -13,4 +13,6 @@ type LoggingConfig struct {
 	LogOptInError    bool
 	LogOptOutSuccess bool
 	LogOptInSuccess  bool
+
+	PingBindAddress string
 }

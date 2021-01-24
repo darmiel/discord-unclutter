@@ -135,3 +135,4 @@ Möchtest du diese Ghost-Pings nicht mehr erhalten, reagiere auf diese Nachricht
 
     LogCategoryCreate = true
     LogChannelCreate = true
+    PingBindAddress = ":1340"

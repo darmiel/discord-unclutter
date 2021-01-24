@@ -8,6 +8,7 @@ import (
 	duconfig "github.com/darmiel/discord-unclutterer/internal/unclutterer/config"
 	"github.com/darmiel/discord-unclutterer/internal/unclutterer/mayfly"
 	"log"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -94,6 +95,15 @@ func main() {
 	fmt.Println("| Bot is now running. Press CTRL-C to exit. |")
 	fmt.Println("+-------------------------------------------+")
 	fmt.Println("")
+
+	go func() {
+		http.HandleFunc("/ping", func(writer http.ResponseWriter, request *http.Request) {
+			_, _ = fmt.Fprintln(writer, "Pong!")
+		})
+		if err := http.ListenAndServe(config.PingBindAddress, nil); err != nil {
+			log.Println("Error serving ping route:", err)
+		}
+	}()
 
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
