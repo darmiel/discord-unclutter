@@ -7,7 +7,7 @@ import (
 )
 
 //goland:noinspection GoUnhandledErrorResult
-func BlocksGhostping(userID string, config *duconfig.Config) (block bool, err error) {
+func BlocksGhostping(userID string, config *duconfig.Config, def bool) (block bool, err error) {
 	db, err := open(config)
 	if err != nil {
 		return false, err
@@ -23,7 +23,7 @@ func BlocksGhostping(userID string, config *duconfig.Config) (block bool, err er
 
 		get := bucket.Get([]byte(userID))
 		if get == nil {
-			block = false
+			block = def
 			return nil
 		}
 

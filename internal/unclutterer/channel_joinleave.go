@@ -37,7 +37,7 @@ func (us *UserVoiceStateSession) UserJoin(config *duconfig.Config) {
 	block := config.GhostPingBlockDefault
 	if config.AllowGhostPingBlocking {
 		// check if user wants to receive ghost pings (opt-out)
-		block, err = database.BlocksGhostping(us.UserID, config)
+		block, err = database.BlocksGhostping(us.UserID, config, block)
 		if config.VerbosityLevel >= 3 {
 			log.Println("👻 Ghost-Ping Get Result:", block, err)
 		}
